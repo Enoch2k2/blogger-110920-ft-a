@@ -1,4 +1,6 @@
-const blogs = [];
+let blogs = [];
+
+const baseUrl = "http://localhost:3000"
 
 function main() {
   return document.getElementById("main");
@@ -23,6 +25,30 @@ function formLink() {
 function blogsLink() {
   return document.getElementById("blogs-link");
 }
+
+function fetchFunction() {
+  
+}
+
+function getBlogs() {
+  // fetch to the rails api, blogs index. Grab the blogs
+  // populate the main div with the blogs
+
+
+  fetch(baseUrl + '/blogs')
+  .then(function(resp){
+    return resp.json()
+  })
+  .then(function(data) {
+    blogs = data
+
+    renderBlogs();
+  })
+  
+
+}
+
+
 
 function resetFormInputs() {
   titleInput().value = "";
@@ -90,12 +116,32 @@ function renderBlogs() {
 function submitForm(e) {
   e.preventDefault();
 
-  blogs.push({
-    title: titleInput().value,
-    content: contentInput().value,
-  });
+  let strongParams = {
+    blog: {
+      title: titleInput().value,
+      content: contentInput().value
+    }
+  }
 
-  renderBlogs();
+  // send data to the backend via a post request
+  fetch(baseUrl + '/blogs', {
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(strongParams),
+    method: "POST"
+  })
+    .then( function(resp) {
+      return resp.json();
+    })
+    .then( function(blog) {
+      blogs.push(blog)
+      renderBlogs();
+    })
+
+
+
 }
 
 function formLinkEvent() {
@@ -115,7 +161,7 @@ function blogsLinkEvent() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  renderForm();
+  getBlogs();
   formLinkEvent();
   blogsLinkEvent();
 });
