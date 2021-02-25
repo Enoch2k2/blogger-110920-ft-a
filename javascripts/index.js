@@ -26,14 +26,9 @@ function blogsLink() {
   return document.getElementById("blogs-link");
 }
 
-function fetchFunction() {
-  
-}
-
 function getBlogs() {
   // fetch to the rails api, blogs index. Grab the blogs
   // populate the main div with the blogs
-
 
   fetch(baseUrl + '/blogs')
   .then(function(resp){
@@ -44,11 +39,7 @@ function getBlogs() {
 
     renderBlogs();
   })
-  
-
 }
-
-
 
 function resetFormInputs() {
   titleInput().value = "";
@@ -76,6 +67,23 @@ function formTemplate() {
   `;
 }
 
+function editFormTemplate(blog) {
+  return `
+  <h3>Edit Blog</h3>
+  <form id="form" data-id="${blog.id}">
+    <div class="input-field">
+      <label for="title">Title</label>
+      <input type="text" name="title" id="title" value="${blog.title}" />
+    </div>
+    <div class="input-field">
+      <label for="content">Content</label><br />
+      <textarea name="content" id="content" cols="30" rows="10">${blog.content}</textarea>
+    </div>
+    <input type="submit" value="Edit Blog" />
+  </form>
+  `;
+}
+
 function blogsTemplate() {
   return `
   <h3>List Of Blogs</h3>
@@ -87,15 +95,62 @@ function renderBlog(blog) {
   let div = document.createElement("div");
   let h4 = document.createElement("h4");
   let p = document.createElement("p");
+  let deleteLink = document.createElement("a");
+  let editLink = document.createElement("a");
   let blogsDiv = document.getElementById("blogs");
+
+  editLink.dataset.id = blog.id;
+  editLink.setAttribute("href", "#")
+  editLink.innerText = "Edit"
+  
+  deleteLink.dataset.id = blog.id
+  deleteLink.setAttribute("href", "#")
+  deleteLink.innerText = "Delete"
+
+  editLink.addEventListener("click", editBlog);
+  deleteLink.addEventListener("click", deleteBlog)
 
   h4.innerText = blog.title;
   p.innerText = blog.content;
 
   div.appendChild(h4);
   div.appendChild(p);
+  div.appendChild(editLink);
+  div.appendChild(deleteLink);
 
   blogsDiv.appendChild(div);
+}
+
+function deleteBlog(e) {
+  e.preventDefault();
+
+  let id = e.target.dataset.id;
+
+  fetch(baseUrl + "/blogs/" + id, {
+    method: "DELETE"
+  })
+  .then(function(resp) {
+    return resp.json();
+  })
+  .then(function(data) {
+
+    blogs = blogs.filter(function(blog){
+      return blog.id !== data.id;
+    })
+
+    renderBlogs();
+  })
+}
+
+function editBlog(e) {
+  e.preventDefault();
+  const id = e.target.dataset.id;
+  
+  const blog = blogs.find(function(blog) {
+    return blog.id == id;
+  })
+
+  renderEditForm(blog)
 }
 
 function renderForm() {
@@ -103,6 +158,56 @@ function renderForm() {
   main().innerHTML = formTemplate();
   form().addEventListener("submit", submitForm);
 }
+
+function renderEditForm(blog) {
+  resetMain();
+  main().innerHTML = editFormTemplate(blog);
+  form().addEventListener("submit", submitEditForm);
+}
+
+function submitEditForm(e) {
+  e.preventDefault();
+
+  let strongParams = {
+    blog: {
+      title: titleInput().value,
+      content: contentInput().value
+    }
+  }
+
+  const id = e.target.dataset.id;
+
+  fetch(baseUrl + "/blogs/" + id, {
+    method: "PATCH",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(strongParams)
+  })
+  .then(function(resp) {
+    return resp.json();
+  })
+  .then(function(blog) {
+    // selects the blog out of the array
+    let b = blogs.find(function(b) {
+      return b.id == blog.id;
+    })
+
+    // gets the index of the blog selected
+    let idx = blogs.indexOf(b);
+
+    // updates the index value with the newly updated blog
+    blogs[idx] = blog;
+    
+    // renders the array of blogs to page
+    renderBlogs();
+  })
+
+}
+
+
+
 
 function renderBlogs() {
   resetMain();
@@ -139,9 +244,6 @@ function submitForm(e) {
       blogs.push(blog)
       renderBlogs();
     })
-
-
-
 }
 
 function formLinkEvent() {
