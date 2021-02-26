@@ -14,6 +14,10 @@ function contentInput() {
   return document.getElementById("content");
 }
 
+function authorInput() {
+  return document.getElementById("author");
+}
+
 function form() {
   return document.getElementById("form");
 }
@@ -26,19 +30,14 @@ function blogsLink() {
   return document.getElementById("blogs-link");
 }
 
-function getBlogs() {
+async function getBlogs() {
   // fetch to the rails api, blogs index. Grab the blogs
   // populate the main div with the blogs
 
-  fetch(baseUrl + '/blogs')
-  .then(function(resp){
-    return resp.json()
-  })
-  .then(function(data) {
-    blogs = data
-
-    renderBlogs();
-  })
+  const resp = await fetch(baseUrl + '/blogs')
+  const data = await resp.json();
+  blogs = data
+  renderBlogs();
 }
 
 function resetFormInputs() {
@@ -57,6 +56,10 @@ function formTemplate() {
     <div class="input-field">
       <label for="title">Title</label>
       <input type="text" name="title" id="title" />
+    </div>
+    <div class="input-field">
+      <label for="author">Author</label>
+      <input type="text" name="author" id="author" />
     </div>
     <div class="input-field">
       <label for="content">Content</label><br />
@@ -94,6 +97,7 @@ function blogsTemplate() {
 function renderBlog(blog) {
   let div = document.createElement("div");
   let h4 = document.createElement("h4");
+  let byAuthor = document.createElement('p');
   let p = document.createElement("p");
   let deleteLink = document.createElement("a");
   let editLink = document.createElement("a");
@@ -111,9 +115,11 @@ function renderBlog(blog) {
   deleteLink.addEventListener("click", deleteBlog)
 
   h4.innerText = blog.title;
+  byAuthor.innerText = `By: ${blog.author.name}`;
   p.innerText = blog.content;
 
   div.appendChild(h4);
+  div.appendChild(byAuthor);
   div.appendChild(p);
   div.appendChild(editLink);
   div.appendChild(deleteLink);
@@ -121,25 +127,21 @@ function renderBlog(blog) {
   blogsDiv.appendChild(div);
 }
 
-function deleteBlog(e) {
+async function deleteBlog(e) {
   e.preventDefault();
 
   let id = e.target.dataset.id;
 
-  fetch(baseUrl + "/blogs/" + id, {
+  const resp = await fetch(baseUrl + "/blogs/" + id, {
     method: "DELETE"
   })
-  .then(function(resp) {
-    return resp.json();
-  })
-  .then(function(data) {
+  const data = await resp.json();
 
-    blogs = blogs.filter(function(blog){
-      return blog.id !== data.id;
-    })
-
-    renderBlogs();
+  blogs = blogs.filter(function(blog){
+    return blog.id !== data.id;
   })
+
+  renderBlogs();
 }
 
 function editBlog(e) {
@@ -228,7 +230,8 @@ function submitForm(e) {
   let strongParams = {
     blog: {
       title: titleInput().value,
-      content: contentInput().value
+      content: contentInput().value,
+      author_attributes: authorInput().value
     }
   }
 
