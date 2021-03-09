@@ -1,8 +1,5 @@
 /** Global Variables **/
 
-let blogs = [];
-
-const baseUrl = "http://localhost:3000"
 
 /** Node Getters **/
 

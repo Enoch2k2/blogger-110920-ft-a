@@ -7,3 +7,8 @@
 
 
 [Backend Url](https://github.com/Enoch2k2/blogger-110920-ft-a-backend)
+
+
+Think about the concern (what does this function belong to?)
+
+If it belongs to a model class - cut it and bring it over to the  model class. Take your time to translate all the invoking (or calling of the function) to that class or instance.
