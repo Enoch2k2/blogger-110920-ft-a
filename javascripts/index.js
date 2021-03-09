@@ -1,35 +1,3 @@
-let blogs = [];
-
-const baseUrl = "http://localhost:3000"
-
-function main() {
-  return document.getElementById("main");
-}
-
-function titleInput() {
-  return document.getElementById("title");
-}
-
-function contentInput() {
-  return document.getElementById("content");
-}
-
-function authorInput() {
-  return document.getElementById("author");
-}
-
-function form() {
-  return document.getElementById("form");
-}
-
-function formLink() {
-  return document.getElementById("form-link");
-}
-
-function blogsLink() {
-  return document.getElementById("blogs-link");
-}
-
 async function getBlogs() {
   // fetch to the rails api, blogs index. Grab the blogs
   // populate the main div with the blogs
@@ -244,7 +212,7 @@ function submitForm(e) {
     body: JSON.stringify(strongParams),
     method: "POST"
   })
-    .then( function(resp) {
+    .then(function(resp) {
       return resp.json();
     })
     .then( function(blog) {
@@ -264,7 +232,7 @@ function formLinkEvent() {
 function blogsLinkEvent() {
   blogsLink().addEventListener("click", function (e) {
     e.preventDefault();
-
+    console.log(this);
     renderBlogs();
   });
 }
